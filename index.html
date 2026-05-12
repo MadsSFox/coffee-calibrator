@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sage Coffee Calibrator</title>
+<!-- PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Coffee Cal">
+<meta name="theme-color" content="#1C0D00">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231C0D00'/%3E%3Cpath d='M50,12 A28,38 0 0,1 50,88 A14,19 0 0,1 50,50 A14,19 0 0,0 50,12 Z' fill='%23C4843A'/%3E%3Cpath d='M50,12 A28,38 0 0,0 50,88 A14,19 0 0,0 50,50 A14,19 0 0,1 50,12 Z' fill='%233B1F0A'/%3E%3Ccircle cx='50' cy='31' r='5' fill='%23C4843A'/%3E%3Ccircle cx='50' cy='69' r='5' fill='%233B1F0A'/%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Sage%20Coffee%20Calibrator%22%2C%22short_name%22%3A%22Coffee%20Cal%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231C0D00%22%2C%22theme_color%22%3A%22%231C0D00%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%2520viewBox%3D'0%25200%2520100%2520100'%253E%253Crect%2520width%3D'100'%2520height%3D'100'%2520rx%3D'22'%2520fill%3D'%25231C0D00'%2F%253E%253Cpath%2520d%3D'M50%2C12%2520A28%2C38%25200%2C0%2C1%252050%2C88%2520A14%2C19%25200%2C0%2C1%252050%2C50%2520A14%2C19%25200%2C0%2C0%252050%2C12%2520Z'%2520fill%3D'%2523C4843A'%2F%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+<style>
+:root { --bg:#1C0D00; --card:#2A1508; --crema:#C4843A; --muted:#907050; --text:#F0E6D3; --border:#3A1A08; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:max(16px,env(safe-area-inset-top)) 16px max(60px,env(safe-area-inset-bottom));max-width:480px;margin:0 auto}
+h1{font-size:1.25rem;color:var(--crema);text-align:center;padding:4px 0 4px}
+.sub{font-size:.75rem;color:#806040;text-align:center;margin-bottom:20px}
+.logo-wrap{display:flex;justify-content:center;padding-top:12px}
+.mimg-wrap{display:none;text-align:center;margin-bottom:10px}
+.mimg-wrap img{max-height:180px;max-width:100%;object-fit:contain;border-radius:10px}
+.lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:10px}
+.card{background:var(--card);border-radius:14px;padding:16px;margin-bottom:14px}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.card-body{display:none;margin-top:12px}
+.card-body.open{display:block}
+.chevron{color:var(--muted);transition:transform .2s}
+.chevron.open{transform:rotate(180deg)}
+.tabs{display:flex;background:var(--bg);border-radius:8px;padding:2px;margin-bottom:12px}
+.tab{flex:1;padding:6px;background:transparent;border:none;border-radius:6px;color:var(--muted);font-size:.8rem;cursor:pointer;transition:background .15s,color .15s}
+.tab.on{background:var(--card);color:var(--text);font-weight:600}
+.pane{display:none}
+.pane.on{display:block}
+.badge{display:inline-block;font-size:.62rem;background:#1A0D00;color:var(--muted);border:1px solid var(--border);border-radius:4px;padding:1px 5px;margin-left:3px}
+/* pH */
+.ph-big{font-size:3rem;font-weight:700;text-align:center;line-height:1;margin-bottom:6px;transition:color .25s}
+.ph-axis{display:flex;justify-content:space-between;font-size:.65rem;color:#6A4828;margin-bottom:4px}
+input[type=range]{-webkit-appearance:none;width:100%;height:8px;border-radius:4px;outline:none;cursor:pointer;background:#4A2810}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--crema);cursor:pointer;border:3px solid var(--bg)}
+.ph-zones{display:flex;gap:3px;margin-top:8px;font-size:.6rem;text-align:center}
+.pz{border-radius:4px;padding:4px 0}
+.pz-lo{flex:3;background:#5A1A0A;color:#F0A090}
+.pz-ok{flex:2;background:#0D3D20;color:#80F0A0}
+.pz-hi{flex:3;background:#4A2400;color:#F0C090}
+.ph-note{font-size:.65rem;color:#806040;margin-top:8px;text-align:center}
+/* crema swatches */
+.sg{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:8px}
+.si{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+.sw{width:100%;aspect-ratio:1;border-radius:50%;border:3px solid transparent;transition:border-color .15s,transform .1s}
+.sw.on{border-color:#F0E6D3}
+.si:active .sw{transform:scale(.9)}
+.sn{font-size:.55rem;color:var(--muted);text-align:center;line-height:1.2}
+.ch{font-size:.7rem;color:#C09060;text-align:center;min-height:1.4em}
+/* upload */
+.upzone{border:2px dashed #4A2810;border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:8px}
+.upzone:hover{border-color:var(--crema)}
+.upzone.has{border-style:solid;border-color:#5A3010}
+.upicon{font-size:1.8rem;margin-bottom:4px}
+.uptxt{font-size:.8rem;color:var(--muted)}
+.upsub{font-size:.65rem;color:#6A4828;margin-top:3px}
+.prev{width:100%;max-height:160px;object-fit:contain;border-radius:8px;margin-bottom:8px;display:none}
+.prev.on{display:block}
+.abtn{width:100%;padding:10px;background:#3A1A08;color:var(--crema);border:1px solid #5A2A10;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;display:none;transition:background .15s}
+.abtn.on{display:block}
+.abtn:hover{background:#4A2210}
+.abtn:disabled{opacity:.5;cursor:default}
+.ares{font-size:.78rem;color:#C09060;background:#1C0D00;border-radius:8px;padding:10px;margin-top:8px;display:none;line-height:1.5}
+.ares.on{display:block}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid #6A4828;border-top-color:var(--crema);border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* File inputs: always in DOM (never inside display:none), positioned off-screen */
+.finput{position:fixed;top:-200vh;left:-200vw;opacity:0;pointer-events:none;width:1px;height:1px}
+/* Shake feedback for disabled-state button click */
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.shake{animation:shake .25s ease}
+.eval-off{background:#4A2A10!important;color:#806040!important;cursor:default!important}
+@keyframes popin{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:translateY(0)}}
+.result-new{animation:popin .35s ease}
+/* number pickers */
+.nrow{display:flex;align-items:center;gap:10px;justify-content:center}
+.nbtn{background:#3A2010;color:#C09060;border:none;border-radius:8px;width:40px;height:40px;font-size:1.3rem;cursor:pointer}
+.nbtn:active{background:#4A2A10}
+.nbtn.sm{width:32px;height:32px;font-size:1rem}
+.ndsp{font-size:2rem;font-weight:700;color:var(--text);min-width:70px;text-align:center}
+.ndsp.md{font-size:1.7rem;min-width:54px}
+.nunit{font-size:.75rem;color:var(--muted)}
+/* grid for machine settings */
+.gg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gf label{display:block;font-size:.7rem;color:var(--muted);margin-bottom:5px}
+.rl{display:flex;justify-content:space-between;font-size:.6rem;color:#6A4828;margin-top:3px}
+select{width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:.85rem;margin-bottom:10px;-webkit-appearance:none}
+/* buttons */
+.eval{width:100%;padding:16px;background:var(--crema);color:var(--bg);border:none;border-radius:14px;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:14px;transition:background .2s}
+.eval:active{background:#D49040}
+.eval:disabled{background:#4A2A10;color:#806040;cursor:default}
+.sec{padding:8px 16px;background:#3A2010;color:#C09060;border:1px solid var(--border);border-radius:8px;font-size:.8rem;cursor:pointer}
+.sec:active{background:#4A2A10}
+/* bar */
+.bw{background:var(--bg);border-radius:4px;height:6px;margin-top:10px;overflow:hidden}
+.bar{height:100%;border-radius:4px;transition:width .2s,background .2s}
+/* results */
+#result{display:none}
+#result.on{display:block}
+.rh{background:var(--card);border-radius:14px;padding:16px;margin-bottom:14px}
+.rtag{display:inline-flex;align-items:center;padding:5px 14px;border-radius:20px;font-size:.8rem;font-weight:600;margin-bottom:10px}
+.rtitle{font-size:1.05rem;font-weight:700;margin-bottom:6px}
+.rdesc{font-size:.82rem;color:#C0A080;line-height:1.5}
+.ac{background:var(--card);border-radius:14px;padding:16px}
+.ah{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:10px}
+.ar{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--border)}
+.ar:first-of-type{border-top:none}
+.an{min-width:22px;height:22px;border-radius:50%;background:#3A1A08;font-size:.65rem;font-weight:700;color:#C09060;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.ab{flex:1}
+.at{font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:6px;margin-bottom:2px;flex-wrap:wrap}
+.ad{font-size:.75rem;color:#A07850;line-height:1.4}
+.dir{font-size:.75rem;font-weight:700;padding:1px 8px;border-radius:10px}
+.dup{background:#0D3D20;color:#60D080}
+.ddn{background:#3D0D0D;color:#E07060}
+.dck{background:#2A2000;color:#D0A020}
+.pfx{text-align:center;padding:16px 0}
+.pfxi{font-size:3rem;margin-bottom:8px}
+/* api settings */
+.api-row{display:flex;gap:8px;margin-bottom:4px}
+.api-in{flex:1;padding:8px 10px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:.8rem;font-family:monospace}
+.astat{font-size:.72rem;margin-top:4px}
+.ok{color:#50C870}
+.er{color:#E07060}
+.anote{font-size:.65rem;color:#6A4828;line-height:1.4;margin-top:8px}
+.pmsg{font-size:.7rem;color:#50C870;margin-top:6px;display:none}
+</style>
+</head>
+<body>
+
+<div class="logo-wrap">
+  <svg viewBox="0 0 100 100" width="56" height="56" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <!-- Crema (light) half -->
+    <path d="M50,2 A38,48 0 0,1 50,98 A19,24 0 0,1 50,50 A19,24 0 0,0 50,2 Z" fill="#C4843A"/>
+    <!-- Espresso (dark) half -->
+    <path d="M50,2 A38,48 0 0,0 50,98 A19,24 0 0,0 50,50 A19,24 0 0,1 50,2 Z" fill="#3B1F0A"/>
+    <!-- Light dot in dark half (upper) -->
+    <circle cx="50" cy="26" r="6.5" fill="#C4843A"/>
+    <!-- Dark dot in light half (lower) -->
+    <circle cx="50" cy="74" r="6.5" fill="#3B1F0A"/>
+    <!-- Bean crease follows the yin-yang S-curve -->
+    <path d="M50,2 A19,24 0 0,0 50,50 A19,24 0 0,1 50,98" fill="none" stroke="rgba(0,0,0,0.28)" stroke-width="1.5"/>
+    <!-- Bean outline -->
+    <ellipse cx="50" cy="50" rx="38" ry="48" fill="none" stroke="#0D0500" stroke-width="2.5"/>
+  </svg>
+</div>
+<h1>Sage Coffee Calibrator</h1>
+<p class="sub">Measure &rarr; diagnose &rarr; dial in</p>
+
+<!-- MACHINE PROFILE -->
+<div class="card">
+  <div class="card-hdr" onclick="tog('mp')">
+    <div class="lbl" style="margin:0">Machine profile</div>
+    <span class="chevron" id="mp-ch">&#8964;</span>
+  </div>
+  <div class="card-body" id="mp-b">
+    <select id="msel" onchange="onMachine()">
+      <option value="">— select your Sage model —</option>
+      <option value="be">Barista Express (BES870/876)</option>
+      <option value="bp">Barista Pro (BES878)</option>
+      <option value="or">Oracle / Oracle Jet (BES980/985)</option>
+      <option value="ot">Oracle Touch (BES990)</option>
+      <option value="db">Dual Boiler (BES920/BES900)</option>
+      <option value="ba">Bambino (BES450)</option>
+      <option value="bp2">Bambino Plus (BES500)</option>
+      <option value="cx">Other / custom</option>
+    </select>
+    <div class="mimg-wrap" id="mimg-wrap">
+      <img id="mimg" src="" alt="" onerror="document.getElementById('mimg-wrap').style.display='none'">
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:.65rem;color:#6A4828;margin-bottom:4px">Read settings from photo <span class="badge">AI</span></div>
+      <label for="msi" class="upzone" id="msz">
+        <div class="upicon">📸</div>
+        <div class="uptxt">Click to upload a photo</div>
+        <div class="upsub">Grinder dial, digital display, or control panel</div>
+      </label>
+      <img class="prev" id="msp">
+      <button class="abtn" id="msab" onclick="analyzeMachineSettings()">Read Settings</button>
+      <div class="ares" id="msar"></div>
+    </div>
+    <div class="gg">
+      <div class="gf" id="gcf">
+        <label id="gcl">Grind setting</label>
+        <div class="nrow" style="justify-content:flex-start;gap:6px">
+          <button class="nbtn sm" onclick="adj('gc',-1)">&#8722;</button>
+          <div class="ndsp md" id="gcd">—</div>
+          <button class="nbtn sm" onclick="adj('gc',+1)">&#43;</button>
+        </div>
+        <div class="rl" id="gcr"></div>
+      </div>
+      <div class="gf">
+        <label>Dose (grams)</label>
+        <div class="nrow" style="justify-content:flex-start;gap:6px">
+          <button class="nbtn sm" onclick="adj('dose',-.5)">&#8722;</button>
+          <div class="ndsp md" id="dosed">—</div>
+          <button class="nbtn sm" onclick="adj('dose',+.5)">&#43;</button>
+        </div>
+        <div class="rl" id="doser"></div>
+      </div>
+    </div>
+    <div id="temprow" style="display:none;margin-top:8px">
+      <div class="gf">
+        <label>Brew temperature (°C)</label>
+        <div class="nrow" style="justify-content:flex-start;gap:6px">
+          <button class="nbtn sm" onclick="adj('temp',-1)">&#8722;</button>
+          <div class="ndsp md" id="tempd">93</div>
+          <button class="nbtn sm" onclick="adj('temp',+1)">&#43;</button>
+        </div>
+        <div class="rl"><span>88°C min</span><span>96°C max</span></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="sec" onclick="savePro()">Save as my machine</button>
+      <button class="sec" onclick="clearPro()">Clear</button>
+    </div>
+    <div class="pmsg" id="pmsg">Profile saved</div>
+  </div>
+</div>
+
+<!-- pH -->
+<div class="card">
+  <div class="lbl">Espresso pH</div>
+  <div class="ph-big" id="phv">5.0</div>
+  <div class="ph-axis"><span>3.0 — acidic</span><span>7.0 — neutral</span></div>
+  <input type="range" id="phs" min="3" max="7" step=".1" value="5">
+  <div class="ph-zones">
+    <div class="pz pz-lo">3.0–4.4<br>under-ext</div>
+    <div class="pz pz-ok">4.5–5.5<br>ideal</div>
+    <div class="pz pz-hi">5.6–7.0<br>over-ext</div>
+  </div>
+  <p class="ph-note">Ideal espresso 4.5–5.5 &nbsp;|&nbsp; Brew water 6.5–7.5</p>
+</div>
+
+<!-- CREMA -->
+<div class="card">
+  <div class="lbl">Crema colour</div>
+  <div class="tabs">
+    <button class="tab on" onclick="stab('cr','man',this)">Manual</button>
+    <button class="tab" onclick="stab('cr','img',this)">Photo <span class="badge">AI</span></button>
+  </div>
+  <div class="pane on" id="cr-man">
+    <div class="sg">
+      <div class="si" data-cv="none" onclick="pickC(this)">
+        <div class="sw" style="background:#1C0D00;border:2px dashed #6A4828"></div>
+        <div class="sn">No<br>crema</div>
+      </div>
+      <div class="si" data-cv="white" onclick="pickC(this)">
+        <div class="sw" style="background:#F0E8D0"></div>
+        <div class="sn">White/<br>Pale</div>
+      </div>
+      <div class="si" data-cv="light" onclick="pickC(this)">
+        <div class="sw" style="background:#D4A84B"></div>
+        <div class="sn">Light<br>Golden</div>
+      </div>
+      <div class="si" data-cv="hazel" onclick="pickC(this)">
+        <div class="sw" style="background:#B47228;border:3px solid #60D080"></div>
+        <div class="sn">Hazel-<br>nut ✓</div>
+      </div>
+      <div class="si" data-cv="tiger" onclick="pickC(this)">
+        <div class="sw" style="background:radial-gradient(circle,#C8823A 30%,#6A3A10 70%);border:3px solid #60D080"></div>
+        <div class="sn">Tiger<br>stripe ✓</div>
+      </div>
+      <div class="si" data-cv="dark" onclick="pickC(this)">
+        <div class="sw" style="background:#2E1008"></div>
+        <div class="sn">Dark/<br>Black</div>
+      </div>
+    </div>
+    <div class="ch" id="ch">Tap the closest match to your crema</div>
+  </div>
+  <div class="pane" id="cr-img">
+    <p style="font-size:.72rem;color:var(--muted);margin-bottom:10px">Upload a top-down photo of the espresso shot immediately after pulling. The crema should be clearly visible.</p>
+    <label for="crsi" class="upzone" id="crsz">
+      <div class="upicon">☕</div>
+      <div class="uptxt">Click to upload a photo</div>
+      <div class="upsub">Top-down shot showing the crema</div>
+    </label>
+    <img class="prev" id="crsp">
+    <button class="abtn" id="crab" onclick="analyzeCrma()">Analyze Crema</button>
+    <div class="ares" id="crar"></div>
+  </div>
+</div>
+
+<!-- EXTRACTION TIME -->
+<div class="card">
+  <div class="lbl">Extraction time <span class="badge">optional</span></div>
+  <div class="nrow">
+    <button class="nbtn" onclick="adj('time',-1)">&#8722;</button>
+    <div>
+      <div class="ndsp" id="timed">--</div>
+      <div class="nunit" style="text-align:center">seconds</div>
+    </div>
+    <button class="nbtn" onclick="adj('time',+1)">&#43;</button>
+  </div>
+  <div style="font-size:.68rem;color:var(--muted);text-align:center;margin-top:8px">Target: 25–30 sec (first drop to finish)</div>
+  <div class="bw"><div class="bar" id="tbar" style="width:0;background:#3A1A08"></div></div>
+</div>
+
+<button class="eval eval-off" id="evb" onclick="runEval()">Select a crema colour first ↑</button>
+<div id="eval-hint" style="display:none;text-align:center;font-size:.8rem;color:#E07060;margin:-8px 0 12px;padding:8px;background:#3D1010;border-radius:8px">
+  Select one of the six crema colour swatches above, then try again.
+</div>
+<div id="result"></div>
+
+<!-- API SETTINGS -->
+<div class="card" style="margin-top:24px;opacity:.85">
+  <div class="card-hdr" onclick="tog('api')">
+    <div class="lbl" style="margin:0">API settings (image analysis)</div>
+    <span class="chevron" id="api-ch">&#8964;</span>
+  </div>
+  <div class="card-body" id="api-b">
+    <p style="font-size:.72rem;color:var(--muted);margin-bottom:10px">Photo analysis uses the Claude AI vision API. Enter your Anthropic API key to enable it.</p>
+    <div class="api-row">
+      <input type="password" class="api-in" id="akin" placeholder="sk-ant-api03-...">
+      <button class="sec" onclick="saveKey()">Save</button>
+    </div>
+    <div id="akstat" class="astat"></div>
+    <p class="anote">Stored only in this browser (localStorage). Sent only to api.anthropic.com — never to any other server. Get a key at console.anthropic.com.</p>
+  </div>
+</div>
+
+<!-- File inputs live here — outside all display:none sections so .click() always works -->
+<input class="finput" type="file" id="msi"  accept="image/*" onchange="onFile('ms',this)">
+<input class="finput" type="file" id="crsi" accept="image/*" onchange="onFile('crs',this)">
+
+<script>
+// ── STATE ──────────────────────────────────────────────
+const S = { ph:5.0, crema:null, time:null, gc:null, dose:null, temp:93, mach:null };
+const files = { crs:null, ms:null };
+
+// ── STORAGE ────────────────────────────────────────────
+const db = {
+  g: k => { try{ return JSON.parse(localStorage.getItem('cc_'+k)) }catch{ return null } },
+  s: (k,v) => localStorage.setItem('cc_'+k, JSON.stringify(v)),
+  d: k => localStorage.removeItem('cc_'+k)
+};
+
+// ── MACHINE PROFILES ───────────────────────────────────
+const CDN = 'https://assets.sageappliances.com/cdn-cgi/image/width=400,format=auto';
+const M = {
+  be:  { gmin:1, gmax:16,  dmin:14, dmax:22, temp:false, note:'Turn dial counter-clockwise for finer.',          img:`${CDN}/BES876/SES876BSS4EEU1/pdp.png` },
+  bp:  { gmin:1, gmax:30,  dmin:14, dmax:22, temp:true,  note:'Lower number = finer on LCD grinder.',            img:`${CDN}/BES878/SES878BSS4EEU1/pdp_1300px.png` },
+  or:  { gmin:1, gmax:45,  dmin:16, dmax:22, temp:true,  note:'Adjust via touchscreen grind override.',          img:`${CDN}/BES985/SES985BSS4EEU1/pdp.png` },
+  ot:  { gmin:1, gmax:45,  dmin:16, dmax:22, temp:true,  note:'Adjust via touchscreen.',                         img:`${CDN}/BES990/SES990BSS4EEU1/pdp1.png` },
+  db:  { gmin:null,        dmin:14, dmax:22, temp:true,  note:'No built-in grinder — use external grinder setting.', img:`${CDN}/BES920/BES920UK/pdp_1300px.png` },
+  ba:  { gmin:null,        dmin:14, dmax:18, temp:false, note:'No built-in grinder.',                            img:`${CDN}/BES450/SES450BSS4EEU1/pdp_1300px.png` },
+  bp2: { gmin:null,        dmin:14, dmax:18, temp:true,  note:'No built-in grinder. 4 temp presets.',            img:`${CDN}/BES500/SES500BSS4EEU1/pdp_1300px.png` },
+  cx:  { gmin:1, gmax:60,  dmin:7,  dmax:30, temp:true,  note:'',                                               img:null },
+};
+
+function onMachine() {
+  const k = document.getElementById('msel').value;
+  S.mach = k || null;
+  const imgWrap = document.getElementById('mimg-wrap');
+  const imgEl   = document.getElementById('mimg');
+  const m = M[k];
+  if (!m) { imgWrap.style.display = 'none'; return; }
+  if (m.img) {
+    imgEl.src = m.img;
+    imgEl.alt = document.getElementById('msel').options[document.getElementById('msel').selectedIndex].text;
+    imgWrap.style.display = 'block';
+  } else {
+    imgWrap.style.display = 'none';
+  }
+  const gcf = document.getElementById('gcf');
+  const gcr = document.getElementById('gcr');
+  if (m.gmin != null) {
+    gcf.style.opacity = '1'; gcf.style.pointerEvents = 'auto';
+    gcr.innerHTML = `<span>${m.gmin}=finest</span><span>${m.gmax}=coarsest</span>`;
+    if (!S.gc) { S.gc = Math.round((m.gmin+m.gmax)/2); document.getElementById('gcd').textContent = S.gc; }
+  } else {
+    gcf.style.opacity = '.35'; gcf.style.pointerEvents = 'none';
+    gcr.innerHTML = '<span>No built-in grinder</span>';
+    document.getElementById('gcd').textContent = '—'; S.gc = null;
+  }
+  const dr = document.getElementById('doser');
+  dr.innerHTML = `<span>${m.dmin}g</span><span>${m.dmax}g</span>`;
+  if (!S.dose) { S.dose = m.dmin <= 16 ? 18 : m.dmin; document.getElementById('dosed').textContent = S.dose; }
+  document.getElementById('temprow').style.display = m.temp ? 'block' : 'none';
+}
+
+function adj(f, d) {
+  const m = S.mach ? M[S.mach] : null;
+  if (f === 'gc') {
+    const mn = m?.gmin??1, mx = m?.gmax??60;
+    S.gc = Math.max(mn, Math.min(mx, (S.gc??Math.round((mn+mx)/2)) + d));
+    document.getElementById('gcd').textContent = S.gc;
+  } else if (f === 'dose') {
+    const mn = m?.dmin??7, mx = m?.dmax??30;
+    S.dose = +Math.max(mn, Math.min(mx, (S.dose??18) + d)).toFixed(1);
+    document.getElementById('dosed').textContent = S.dose;
+  } else if (f === 'temp') {
+    S.temp = Math.max(88, Math.min(96, S.temp + d));
+    document.getElementById('tempd').textContent = S.temp;
+  } else if (f === 'time') {
+    if (S.time == null) S.time = 27;
+    S.time = Math.max(10, Math.min(60, S.time + d));
+    document.getElementById('timed').textContent = S.time;
+    const pct = Math.min(100,((S.time-10)/50)*100);
+    const col = S.time<22?'#C0392B':S.time>33?'#D4821A':'#2D7D46';
+    const b = document.getElementById('tbar');
+    b.style.width=pct+'%'; b.style.background=col;
+  }
+}
+
+function savePro() {
+  db.s('pro',{mach:S.mach,gc:S.gc,dose:S.dose,temp:S.temp});
+  const el = document.getElementById('pmsg'); el.style.display='block';
+  setTimeout(()=>el.style.display='none',2000);
+}
+function clearPro() {
+  db.d('pro'); S.gc=null; S.dose=null;
+  document.getElementById('gcd').textContent='—';
+  document.getElementById('dosed').textContent='—';
+  document.getElementById('msel').value=''; S.mach=null;
+}
+function loadPro() {
+  const p = db.g('pro'); if (!p) return;
+  if (p.mach) { document.getElementById('msel').value=p.mach; S.mach=p.mach; onMachine(); }
+  if (p.gc!=null)   { S.gc=p.gc;     document.getElementById('gcd').textContent=p.gc; }
+  if (p.dose!=null) { S.dose=p.dose; document.getElementById('dosed').textContent=p.dose; }
+  if (p.temp!=null) { S.temp=p.temp; document.getElementById('tempd').textContent=p.temp; }
+}
+
+// ── COLLAPSIBLES ───────────────────────────────────────
+function tog(id) {
+  const b = document.getElementById(id+'-b');
+  const c = document.getElementById(id+'-ch');
+  const open = b.classList.toggle('open');
+  c.classList.toggle('open', open);
+}
+
+// ── TABS ───────────────────────────────────────────────
+function stab(grp, pane, btn) {
+  btn.closest('.card').querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  btn.closest('.card').querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  document.getElementById(grp+'-'+pane).classList.add('on');
+}
+
+// ── pH SLIDER ──────────────────────────────────────────
+const phs = document.getElementById('phs');
+const phv = document.getElementById('phv');
+phs.addEventListener('input', () => {
+  S.ph = +phs.value;
+  phv.textContent = S.ph.toFixed(1);
+  phv.style.color = S.ph<4.5?'#E06040':S.ph>5.5?'#D4821A':'#50C870';
+  const pct = ((S.ph-3)/4)*100;
+  const col = S.ph<4.5?'#C0392B':S.ph>5.5?'#D4821A':'#2D7D46';
+  phs.style.background=`linear-gradient(to right,${col} ${pct}%,#4A2810 ${pct}%)`;
+});
+phs.dispatchEvent(new Event('input'));
+
+// ── CREMA (manual) ─────────────────────────────────────
+const chints = {
+  none:'No crema — check bean freshness and basket',
+  white:'White/Pale — likely under-extracted',
+  light:'Light Golden — slightly under-extracted',
+  hazel:'Hazelnut — ideal extraction colour',
+  tiger:'Tiger stripe — excellent extraction',
+  dark:'Dark/Black — likely over-extracted',
+};
+function pickC(el) {
+  const val = el.dataset.cv;
+  document.querySelectorAll('.sw').forEach(s=>s.classList.remove('on'));
+  el.querySelector('.sw').classList.add('on');
+  S.crema = val;
+  document.getElementById('ch').textContent = chints[val];
+  const evb = document.getElementById('evb');
+  evb.classList.remove('eval-off');
+  evb.textContent = 'Evaluate & Calibrate';
+  document.getElementById('eval-hint').style.display = 'none';
+}
+function setCrema(val) {
+  const el = document.querySelector(`.si[data-cv="${val}"]`);
+  if (el) pickC(el);
+}
+
+// ── IMAGE UPLOADS ──────────────────────────────────────
+function onFile(key, input) {
+  const f = input.files[0]; if(!f) return;
+  files[key] = f;
+  const map = { crs:['crsp','crsz','crab'], ms:['msp','msz','msab'] };
+  const [imgId, zoneId, btnId] = map[key];
+  const r = new FileReader();
+  r.onload = e => {
+    const img = document.getElementById(imgId);
+    img.src = e.target.result; img.classList.add('on');
+    document.getElementById(zoneId).querySelector('.uptxt').textContent = f.name;
+    document.getElementById(zoneId).classList.add('has');
+  };
+  r.readAsDataURL(f);
+  if (btnId) document.getElementById(btnId).classList.add('on');
+}
+
+// ── CLAUDE API ─────────────────────────────────────────
+async function b64(file) {
+  return new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload = ()=>res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+async function claude(msgs) {
+  const key = db.g('apiKey');
+  if (!key) throw new Error('No API key saved — open API Settings below to add yours.');
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key': key,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true',
+    },
+    body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:300, messages:msgs }),
+  });
+  if (!resp.ok) { const e=await resp.json().catch(()=>({})); throw new Error(e?.error?.message||`API error ${resp.status}`); }
+  return (await resp.json()).content[0].text;
+}
+function pjson(text) {
+  // Greedy match to capture the full outermost JSON object
+  const m = text.match(/\{[\s\S]*\}/); if(!m) throw new Error('No JSON in response');
+  try { return JSON.parse(m[0]); }
+  catch { throw new Error('Malformed JSON from AI — try re-analyzing'); }
+}
+
+function needsKey(out) {
+  if (db.g('apiKey')) return false;
+  out.innerHTML = '<strong style="color:#E07060">API key required</strong><br>Add your Anthropic key in the Settings section — scroll down and open "API settings".';
+  out.classList.add('on');
+  const ab = document.getElementById('api-b');
+  if (!ab.classList.contains('open')) tog('api');
+  setTimeout(() => ab.scrollIntoView({behavior:'smooth',block:'start'}), 100);
+  return true;
+}
+
+async function analyzeMachineSettings() {
+  const btn = document.getElementById('msab');
+  const out = document.getElementById('msar');
+  if (!files.ms) return;
+  if (needsKey(out)) return;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>Reading settings...';
+  out.className = 'ares'; out.innerHTML = '';
+  try {
+    const selEl   = document.getElementById('msel');
+    const machName = selEl.value ? selEl.options[selEl.selectedIndex].text : 'Sage espresso machine';
+    const m = S.mach ? M[S.mach] : null;
+    const grindHint = m?.gmin != null ? `The grind dial on this machine runs from ${m.gmin} (finest) to ${m.gmax} (coarsest).` : '';
+    const res = pjson(await claude([{ role:'user', content:[
+      { type:'image', source:{ type:'base64', media_type:files.ms.type||'image/jpeg', data:await b64(files.ms) }},
+      { type:'text', text:`This is a photo of a ${machName}. ${grindHint}
+
+Read every visible setting, dial position, or display value. Look for:
+- Grind size setting: the exact number shown on the grinder dial or digital display
+- Dose: grams or seconds shown on a dose display
+- Brew temperature in °C shown on a display
+- Pre-infusion duration or pressure settings if visible
+- Any other setting labels and values you can read
+
+If you can identify the machine model from what you see, include that too.
+
+Return ONLY valid JSON — no extra text, no markdown:
+{"grind":10,"dose":18.0,"temp":93,"model_detected":null,"other_settings":"any other visible setting values","confidence":"high","notes":"brief description of what you saw"}
+
+Use null for values you cannot see clearly. grind/dose/temp must be numbers or null.` }
+    ]}]));
+
+    const applied = [];
+    if (res.grind != null) {
+      const clamped = m?.gmin != null ? Math.max(m.gmin, Math.min(m.gmax, Math.round(res.grind))) : Math.round(res.grind);
+      S.gc = clamped;
+      document.getElementById('gcd').textContent = clamped;
+      // reveal grind field if it was hidden (no machine selected yet)
+      document.getElementById('gcf').style.opacity = '1';
+      document.getElementById('gcf').style.pointerEvents = 'auto';
+      applied.push(`Grind → ${clamped}`);
+    }
+    if (res.dose != null) {
+      const clamped = m ? +Math.max(m.dmin, Math.min(m.dmax, res.dose)).toFixed(1) : +res.dose.toFixed(1);
+      S.dose = clamped;
+      document.getElementById('dosed').textContent = clamped;
+      applied.push(`Dose → ${clamped}g`);
+    }
+    if (res.temp != null) {
+      S.temp = Math.max(88, Math.min(96, res.temp));
+      document.getElementById('tempd').textContent = S.temp;
+      document.getElementById('temprow').style.display = 'block';
+      applied.push(`Temp → ${S.temp}°C`);
+    }
+    if (res.model_detected && !S.mach) {
+      out.innerHTML += `<div style="color:#C09060;margin-bottom:4px">Detected model: ${res.model_detected}</div>`;
+    }
+
+    const appliedHtml = applied.length
+      ? `<div style="color:#50C870;margin-top:4px">Applied: ${applied.join(', ')}</div>`
+      : '<div style="color:#D0A020;margin-top:4px">No numeric settings detected — check image clarity.</div>';
+    out.innerHTML = `<strong>${res.confidence} confidence</strong> — ${res.notes||''}` +
+      (res.other_settings ? `<br><span style="color:#907050">${res.other_settings}</span>` : '') +
+      appliedHtml;
+    out.classList.add('on');
+  } catch(e) {
+    out.innerHTML = `<span class="er">Error: ${e.message}</span>`;
+    out.classList.add('on');
+  } finally { btn.disabled=false; btn.innerHTML='Read Settings'; }
+}
+
+
+async function analyzeCrma() {
+  const btn=document.getElementById('crab'), out=document.getElementById('crar');
+  if (!files.crs) return;
+  if (needsKey(out)) return;
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>Analyzing...';
+  out.className='ares'; out.innerHTML='';
+  try {
+    const res = pjson(await claude([{ role:'user', content:[
+      { type:'image', source:{ type:'base64', media_type:files.crs.type||'image/jpeg', data:await b64(files.crs) }},
+      { type:'text', text:`Analyze the crema (foam) on top of this espresso shot. Classify into exactly one: "none" (no crema), "white" (white/pale), "light" (light golden), "hazel" (hazelnut brown — ideal), "tiger" (tiger stripe dark/light — ideal), "dark" (very dark/black). Return ONLY valid JSON: {"crema":"hazel","confidence":"high","note":"one line observation"}` }
+    ]}]));
+    setCrema(res.crema);
+    out.innerHTML = `<strong>Detected crema: ${res.crema}</strong> (${res.confidence} confidence)<br>${res.note||''}<br><small style="color:#6A4828">Swatch updated. Switch to Manual to confirm.</small>`;
+    out.classList.add('on');
+  } catch(e) {
+    out.innerHTML = `<span class="er">Error: ${e.message}</span>`;
+    out.classList.add('on');
+  } finally { btn.disabled=false; btn.innerHTML='Analyze Crema'; }
+}
+
+// ── API KEY ────────────────────────────────────────────
+function saveKey() {
+  const k = document.getElementById('akin').value.trim(); if(!k) return;
+  db.s('apiKey', k);
+  document.getElementById('akin').value='';
+  document.getElementById('akstat').innerHTML='<span class="ok">Key saved</span>';
+  setTimeout(()=>document.getElementById('akstat').innerHTML='',3000);
+}
+function loadKey() {
+  const k = db.g('apiKey');
+  if (k) document.getElementById('akstat').innerHTML=`<span class="ok">Key loaded (${k.slice(0,14)}…)</span>`;
+}
+
+// ── EVALUATE ───────────────────────────────────────────
+function runEval() {
+  const hint = document.getElementById('eval-hint');
+  if (!S.crema) {
+    hint.style.display = 'block';
+    // scroll crema card into view and flash its border
+    const cremaCard = document.getElementById('cr-man').closest('.card');
+    cremaCard.style.outline = '2px solid #C4843A';
+    cremaCard.scrollIntoView({behavior:'smooth', block:'nearest'});
+    setTimeout(() => cremaCard.style.outline = '', 1800);
+    return;
+  }
+  hint.style.display = 'none';
+  try {
+    const ph=S.ph, c=S.crema, t=S.time, g=S.gc, dose=S.dose, temp=S.temp;
+    const m = S.mach ? M[S.mach] : null;
+    const phLo=ph<4.5, phHi=ph>5.5, phOk=!phLo&&!phHi;
+    const cU=c==='white'||c==='light', cG=c==='hazel'||c==='tiger', cO=c==='dark', cN=c==='none';
+    const tFast=t!=null&&t<22, tSlow=t!=null&&t>33;
+    const el=document.getElementById('result');
+    el.innerHTML=build(ph,c,t,phLo,phHi,phOk,cU,cG,cO,cN,tFast,tSlow,g,dose,temp,m);
+    el.className='on result-new';
+    setTimeout(() => el.scrollIntoView({behavior:'smooth', block:'start'}), 50);
+  } catch(e) {
+    const el=document.getElementById('result');
+    el.innerHTML=`<div class="rh"><div class="rtitle" style="color:#E07060">Something went wrong</div><div class="rdesc">${e.message}</div></div>`;
+    el.className='on result-new';
+    setTimeout(() => el.scrollIntoView({behavior:'smooth', block:'start'}), 50);
+  }
+}
+
+// ── RESULT BUILDER ─────────────────────────────────────
+function tag(type) {
+  const x={
+    perfect:{bg:'#0D3D20',c:'#50C870',l:'Perfect'},
+    under:  {bg:'#3D1010',c:'#E07060',l:'Under-Extracted'},
+    over:   {bg:'#3D2000',c:'#E09040',l:'Over-Extracted'},
+    slight: {bg:'#2A2000',c:'#D0A020',l:'Minor Adjustment'},
+    mix:    {bg:'#1A1A30',c:'#8888CC',l:'Mixed Signals'},
+    stale:  {bg:'#2A1A30',c:'#9060C0',l:'Bean / Water Issue'},
+  }[type];
+  return `<div class="rtag" style="background:${x.bg};color:${x.c}">${x.l}</div>`;
+}
+function row(n,title,dir,detail) {
+  const cls={up:'dup',down:'ddn',check:'dck'}[dir];
+  const lbl={up:'Increase',down:'Decrease',check:'Check'}[dir];
+  return `<div class="ar"><div class="an">${n}</div><div class="ab"><div class="at">${title} <span class="dir ${cls}">${lbl}</span></div><div class="ad">${detail}</div></div></div>`;
+}
+function hdr(t,title,desc){ return `<div class="rh">${tag(t)}<div class="rtitle">${title}</div><div class="rdesc">${desc}</div></div>`; }
+function acard(rows){ return `<div class="ac"><div class="ah">Adjustments — in priority order</div>${rows}</div>`; }
+
+// grind/dose/temp helpers with specific numbers
+function gFiner(g,m)  { if(!g||!m?.gmin)return'Move grind 1–2 steps finer'; const t=Math.max(m.gmin,g-2); return`Move grind <strong>${g} → ${t}</strong> (${g-t} step${g-t>1?'s':''}). ${m.note}`; }
+function gCoarser(g,m){ if(!g||!m?.gmax)return'Move grind 1–2 steps coarser'; const t=Math.min(m.gmax,g+2); return`Move grind <strong>${g} → ${t}</strong> (${t-g} step${t-g>1?'s':''}). ${m.note}`; }
+function dUp(d,m)  { if(!d)return'Add 0.5–1 g to dose'; const mx=m?.dmax??22; return d>=mx?`Dose at max (${d}g) — adjust grind instead`:`Dose <strong>${d}g → ${Math.min(+(d+1).toFixed(1),mx)}g</strong>`; }
+function dDn(d,m)  { if(!d)return'Reduce dose by 0.5–1 g'; const mn=m?.dmin??14; return d<=mn?`Dose at min (${d}g) — adjust grind instead`:`Dose <strong>${d}g → ${Math.max(+(d-1).toFixed(1),mn)}g</strong>`; }
+function tUp(temp,m)  { if(!m?.temp)return'Step water temp up 1–2 °C if your machine allows'; const t=Math.min(96,temp+2); return`Temperature <strong>${temp}°C → ${t}°C</strong>`; }
+function tDn(temp,m)  { if(!m?.temp)return'Step water temp down 1–2 °C if your machine allows'; const t=Math.max(88,temp-2); return`Temperature <strong>${temp}°C → ${t}°C</strong>`; }
+
+function build(ph,c,t,phLo,phHi,phOk,cU,cG,cO,cN,tFast,tSlow,g,dose,temp,m) {
+  const p=ph.toFixed(1), ts=t?`${t} sec`:'not measured';
+
+  if (cN) return hdr('stale','No crema — investigate first',
+    'Healthy espresso always produces crema. Absence means stale beans, wrong basket, or severely underfilled puck.')+
+    acard(row(1,'Bean freshness','check','Beans older than ~6 weeks lose all CO₂. Check roast date — use beans 7–30 days post-roast.')+
+          row(2,'Dose','up',dUp(dose,m)+' — underfilled basket won\'t seal.')+
+          row(3,'Grind size','down',gFiner(g,m)+' — needed to build pressure.'));
+
+  if (phOk&&cG&&(t==null||(t>=22&&t<=33))) return `<div class="rh">${tag('perfect')}<div class="pfx"><div class="pfxi">☕</div><div class="rtitle">Perfectly calibrated</div><div class="rdesc">pH ${p} is ideal${t?`, extraction ${ts} on target`:''} and crema is excellent. No changes needed.</div></div></div>`;
+
+  if (phLo&&cU) return hdr('under','Under-extracted — sour and pale',
+    `pH ${p} and pale crema both confirm insufficient extraction.${tFast?` Fast shot (${ts}) confirms this.`:''}`)+
+    acard(row(1,'Grind size','down',gFiner(g,m))+row(2,'Extraction time','up',`Target 25–30 sec. Currently ${ts}.`)+row(3,'Dose','up',dUp(dose,m))+row(4,'Temperature','up',tUp(temp,m)));
+
+  if (phHi&&cO) return hdr('over','Over-extracted — bitter and dark',
+    `pH ${p} and dark crema both confirm over-extraction.${tSlow?` Slow shot (${ts}) confirms this.`:''}`)+
+    acard(row(1,'Grind size','up',gCoarser(g,m))+row(2,'Extraction time','down',`Target 25–30 sec. Currently ${ts}.`)+row(3,'Dose','down',dDn(dose,m))+row(4,'Temperature','down',tDn(temp,m)));
+
+  if (phLo&&cO) return hdr('mix','Channeling — sour taste, dark crema',
+    `Low pH (${p}, sour) with dark crema is classic channeling: water tunnels through a weak spot, over-extracting that channel while most of the puck stays under-extracted.`)+
+    acard(row(1,'Puck distribution','check','Stir grounds with a WDT tool before tamping to break clumps — the primary channeling cause.')+
+          row(2,'Tamping','check','Tamp completely level. Check spent puck for dry spots — these mark where water channeled.')+
+          row(3,'Grind size','up',gCoarser(g,m)+' — coarser grinds are easier to distribute evenly.')+
+          row(4,'Dose','up',dUp(dose,m)+' — even fill reduces headspace.'));
+
+  if (phHi&&cU) return hdr('stale','Stale beans or alkaline water',
+    `High pH (${p}, bitter) with pale/thin crema is contradictory. Most likely: beans over 6 weeks old, or hard/alkaline brew water inflating the pH reading.`)+
+    acard(row(1,'Bean freshness','check','Beans > 6 weeks lose CO₂ (thin crema) and develop stale bitterness. Check roast date.')+
+          row(2,'Water quality','check','Hard or alkaline tap water (pH > 7.5) raises espresso pH. Use filtered water — BWT Mg+ filter if your machine supports it.')+
+          row(3,'Grind size','up',gCoarser(g,m)+' — if beans are fresh.')+
+          row(4,'Temperature','down',tDn(temp,m)));
+
+  if (phOk&&cU) return hdr('mix','Puck prep issue — extraction uneven',
+    `pH ${p} is in range but pale crema suggests channeling or uneven puck prep.`)+
+    acard(row(1,'Puck distribution','check','Stir grounds before tamping. Channeling causes pale crema even when overall chemistry looks fine.')+
+          row(2,'Tamping','check','Level, consistent tamp. Inspect spent puck for dry or wet spots.')+
+          row(3,'Grind size','down',gFiner(g,m)+' — only if distribution is already good.')+
+          row(4,'Basket','check','Backflush group head. Check basket holes for partial blockages.'));
+
+  if (phOk&&cO) return hdr('slight','Slightly over-extracted or very fresh beans',
+    `pH ${p} is acceptable but dark crema suggests beans under 5 days off roast (excess CO₂), or a slight over-extraction.`)+
+    acard(row(1,'Bean age','check','Beans < 5 days post-roast produce dark unstable crema. Rest to 7+ days before pulling.')+
+          row(2,'Grind size','up',gCoarser(g,m).replace('2 step','1 step').replace('2)','1)'))+
+          row(3,'Extraction time','down',`If over 30 sec, shorten slightly. Currently ${ts}.`));
+
+  if (phLo&&cG) return hdr('slight','Slightly acidic — crema looks fine',
+    `Crema is good but pH ${p} is on the sour/acidic side. Could be bean variety (light/natural process). Make small changes only.`)+
+    acard(row(1,'Temperature','up',tUp(temp,m)+' — higher temp extracts sweeter compounds that balance acidity.')+
+          row(2,'Grind size','down',gFiner(g,m).replace('2 step','1 step').replace('2)','1)'))+
+          row(3,'Extraction time','up',`Aim for upper end of 25–30 sec window. Currently ${ts}.`));
+
+  if (phHi&&cG) return hdr('slight','Slightly bitter — crema looks fine',
+    `Crema is good but pH ${p} leans alkaline/bitter. Common with dark or robusta blends.`)+
+    acard(row(1,'Temperature','down',tDn(temp,m)+' — small drop reduces bitter alkaloid extraction.')+
+          row(2,'Grind size','up',gCoarser(g,m).replace('2 step','1 step').replace('2)','1)'))+
+          row(3,'Extraction time','down',`Aim for lower end of 25–30 sec window. Currently ${ts}.`));
+
+  return `<div class="rh">${tag('slight')}<div class="rtitle">Unclear diagnosis</div><div class="rdesc">Adjust inputs and re-evaluate.</div></div>`;
+}
+
+// ── INIT ───────────────────────────────────────────────
+loadPro();
+loadKey();
+if (!db.g('pro'))    tog('mp');
+if (!db.g('apiKey')) tog('api');
+
+// ── SERVICE WORKER (offline / PWA) ────────────────────
+if ('serviceWorker' in navigator) {
+  const sw = `
+    const CACHE = 'coffee-cal-v1';
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE).then(c => c.add('/')));
+      self.skipWaiting();
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
+      self.clients.claim();
+    });
+    self.addEventListener('fetch', e => {
+      e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+        return res;
+      })));
+    });
+  `;
+  const blob = new Blob([sw], {type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob), {scope: location.pathname})
+    .catch(() => {});
+}
+</script>
+</body>
+</html>
