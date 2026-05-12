@@ -129,6 +129,28 @@ select{width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px
 .er{color:#E07060}
 .anote{font-size:.65rem;color:#6A4828;line-height:1.4;margin-top:8px}
 .pmsg{font-size:.7rem;color:#50C870;margin-top:6px;display:none}
+/* bean library */
+.bean-item{background:#1C0D00;border-radius:10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--border)}
+.bean-item.bean-active{border-color:#C4843A}
+.bean-nm{font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:2px}
+.bean-mt{font-size:.65rem;color:var(--muted);margin-bottom:6px;line-height:1.4}
+.bean-acts{display:flex;gap:6px}
+.bload{flex:1;padding:6px;background:#3A2010;color:#C09060;border:1px solid var(--border);border-radius:6px;font-size:.75rem;cursor:pointer;font-weight:600}
+.bload.active{background:var(--crema);color:var(--bg)}
+.bdel{padding:6px 10px;background:transparent;color:#6A4828;border:1px solid #3A1A08;border-radius:6px;font-size:.75rem;cursor:pointer}
+.bdel:active{color:#E07060;border-color:#E07060}
+.tinput{width:100%;padding:8px 10px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:.85rem;margin-bottom:8px}
+.tinput:focus{outline:none;border-color:var(--crema)}
+/* shot log / trend */
+.log-btn{width:100%;padding:10px;background:#1A2A1A;color:#50C870;border:1px solid #254025;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;margin-top:10px;transition:background .15s}
+.log-btn:active{background:#203020}
+.log-btn.done{background:#204020;color:#30A850;cursor:default}
+.trend-box{background:#1A1830;border-radius:10px;padding:12px;margin-top:10px;border:1px solid #2A2840}
+.trend-hd{font-size:.72rem;font-weight:600;color:#8888CC;margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em}
+.trend-row{display:flex;justify-content:space-between;font-size:.7rem;color:#B0B0D0;padding:4px 0;border-bottom:1px solid #22203A}
+.trend-row:last-of-type{border:none}
+.trend-tip{font-size:.78rem;color:#C0C0FF;background:#20203A;border-radius:8px;padding:10px;margin-top:8px;line-height:1.5}
+.trend-tip strong{color:#A0A0FF}
 </style>
 </head>
 <body>
@@ -220,6 +242,61 @@ select{width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px
       <button class="sec" onclick="clearPro()">Clear</button>
     </div>
     <div class="pmsg" id="pmsg">Profile saved</div>
+  </div>
+</div>
+
+<!-- BEAN LIBRARY -->
+<div class="card">
+  <div class="card-hdr" onclick="tog('bean')">
+    <div class="lbl" style="margin:0">Bean library <span class="badge" id="bean-cnt">0</span></div>
+    <span class="chevron" id="bean-ch">&#8964;</span>
+  </div>
+  <div class="card-body" id="bean-b">
+    <div class="tabs">
+      <button class="tab on" onclick="stab('bl','id',this)">Identify</button>
+      <button class="tab" onclick="stab('bl','lib',this)">Library <span class="badge" id="bean-cnt2">0</span></button>
+    </div>
+    <!-- Identify pane -->
+    <div class="pane on" id="bl-id">
+      <label for="beani" class="upzone" id="beanz">
+        <div class="upicon">🛍️</div>
+        <div class="uptxt">Photo of the coffee bag</div>
+        <div class="upsub">AI reads brand, roast, origin &amp; barcode</div>
+      </label>
+      <img class="prev" id="beanp">
+      <button class="abtn" id="beanab" onclick="analyzeBag()">Identify Bean</button>
+      <div class="ares" id="beanar"></div>
+      <div id="bean-form" style="display:none;margin-top:10px">
+        <div class="lbl" style="margin-bottom:4px">Name / product</div>
+        <input type="text" id="bean-name" class="tinput" placeholder="e.g. Blue Bottle Three Africas">
+        <div class="gg">
+          <div class="gf">
+            <label>Roast</label>
+            <select id="bean-roast" style="margin:0">
+              <option value="">—</option>
+              <option value="light">Light</option>
+              <option value="medium-light">Medium-Light</option>
+              <option value="medium">Medium</option>
+              <option value="medium-dark">Medium-Dark</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+          <div class="gf">
+            <label>Origin</label>
+            <input type="text" id="bean-origin" class="tinput" style="margin:0" placeholder="e.g. Ethiopia">
+          </div>
+        </div>
+        <div class="lbl" style="margin-top:10px;margin-bottom:4px">Barcode <span class="badge">optional</span></div>
+        <input type="text" id="bean-barcode" class="tinput" placeholder="EAN / UPC number" style="font-family:monospace">
+        <button class="sec" onclick="saveBean()" style="width:100%;padding:10px;margin-top:4px">Save bean + current settings</button>
+        <div class="pmsg" id="bean-saved-msg">Bean saved ✓</div>
+      </div>
+    </div>
+    <!-- Library pane -->
+    <div class="pane" id="bl-lib">
+      <div id="bean-list"></div>
+      <div id="bean-empty" style="font-size:.75rem;color:var(--muted);text-align:center;padding:20px 0">No beans saved yet.<br>Use Identify to add your first bean.</div>
+    </div>
   </div>
 </div>
 
@@ -325,13 +402,14 @@ select{width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px
 </div>
 
 <!-- File inputs live here — outside all display:none sections so .click() always works -->
-<input class="finput" type="file" id="msi"  accept="image/*" onchange="onFile('ms',this)">
-<input class="finput" type="file" id="crsi" accept="image/*" onchange="onFile('crs',this)">
+<input class="finput" type="file" id="msi"   accept="image/*" onchange="onFile('ms',this)">
+<input class="finput" type="file" id="crsi"  accept="image/*" onchange="onFile('crs',this)">
+<input class="finput" type="file" id="beani" accept="image/*" onchange="onFile('bean',this)">
 
 <script>
 // ── STATE ──────────────────────────────────────────────
-const S = { ph:5.0, crema:null, time:null, gc:null, dose:null, temp:93, mach:null };
-const files = { crs:null, ms:null };
+const S = { ph:5.0, crema:null, time:null, gc:null, dose:null, temp:93, mach:null, beanId:null, lastTag:null };
+const files = { crs:null, ms:null, bean:null };
 
 // ── STORAGE ────────────────────────────────────────────
 const db = {
@@ -485,7 +563,7 @@ function setCrema(val) {
 function onFile(key, input) {
   const f = input.files[0]; if(!f) return;
   files[key] = f;
-  const map = { crs:['crsp','crsz','crab'], ms:['msp','msz','msab'] };
+  const map = { crs:['crsp','crsz','crab'], ms:['msp','msz','msab'], bean:['beanp','beanz','beanab'] };
   const [imgId, zoneId, btnId] = map[key];
   const r = new FileReader();
   r.onload = e => {
@@ -664,8 +742,14 @@ function runEval() {
     const phLo=ph<4.5, phHi=ph>5.5, phOk=!phLo&&!phHi;
     const cU=c==='white'||c==='light', cG=c==='hazel'||c==='tiger', cO=c==='dark', cN=c==='none';
     const tFast=t!=null&&t<22, tSlow=t!=null&&t>33;
+    S.lastTag = null;
     const el=document.getElementById('result');
-    el.innerHTML=build(ph,c,t,phLo,phHi,phOk,cU,cG,cO,cN,tFast,tSlow,g,dose,temp,m);
+    const resultHtml = build(ph,c,t,phLo,phHi,phOk,cU,cG,cO,cN,tFast,tSlow,g,dose,temp,m);
+    // perfect tag is set inline, not via hdr()
+    if (!S.lastTag && resultHtml.includes("'perfect'")) S.lastTag = 'perfect';
+    if (!S.lastTag) S.lastTag = 'slight';
+    el.innerHTML = resultHtml + buildTrend(S.beanId) +
+      `<button class="log-btn" id="log-btn" onclick="logShot('${S.lastTag}')">Log this shot</button>`;
     el.className='on result-new';
     setTimeout(() => el.scrollIntoView({behavior:'smooth', block:'start'}), 50);
   } catch(e) {
@@ -693,7 +777,7 @@ function row(n,title,dir,detail) {
   const lbl={up:'Increase',down:'Decrease',check:'Check'}[dir];
   return `<div class="ar"><div class="an">${n}</div><div class="ab"><div class="at">${title} <span class="dir ${cls}">${lbl}</span></div><div class="ad">${detail}</div></div></div>`;
 }
-function hdr(t,title,desc){ return `<div class="rh">${tag(t)}<div class="rtitle">${title}</div><div class="rdesc">${desc}</div></div>`; }
+function hdr(t,title,desc){ S.lastTag=t; return `<div class="rh">${tag(t)}<div class="rtitle">${title}</div><div class="rdesc">${desc}</div></div>`; }
 function acard(rows){ return `<div class="ac"><div class="ah">Adjustments — in priority order</div>${rows}</div>`; }
 
 // grind/dose/temp helpers with specific numbers
@@ -765,9 +849,169 @@ function build(ph,c,t,phLo,phHi,phOk,cU,cG,cO,cN,tFast,tSlow,g,dose,temp,m) {
   return `<div class="rh">${tag('slight')}<div class="rtitle">Unclear diagnosis</div><div class="rdesc">Adjust inputs and re-evaluate.</div></div>`;
 }
 
+// ── BEAN LIBRARY ──────────────────────────────────────
+let beans = db.g('beans') || [];
+let shots = db.g('shots') || [];
+
+function saveBeans() { db.s('beans', beans); renderBeans(); }
+function saveShots() { db.s('shots', shots); }
+
+async function analyzeBag() {
+  const btn = document.getElementById('beanab');
+  const out = document.getElementById('beanar');
+  if (!files.bean) { out.innerHTML='<span class="er">Upload a photo first.</span>'; out.classList.add('on'); return; }
+  if (needsKey(out)) return;
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span>Identifying...';
+  out.className = 'ares'; out.innerHTML = '';
+
+  // Try native BarcodeDetector for fast barcode read (Chrome/Android)
+  let nativeBarcode = '';
+  if ('BarcodeDetector' in window) {
+    try {
+      const det = new BarcodeDetector({ formats: ['ean_13','ean_8','upc_a','upc_e','code_128','code_39'] });
+      const codes = await det.detect(document.getElementById('beanp'));
+      if (codes.length) nativeBarcode = codes[0].rawValue;
+    } catch(_) {}
+  }
+
+  try {
+    const content = [
+      { type:'image', source:{ type:'base64', media_type:files.bean.type||'image/jpeg', data:await b64(files.bean) }},
+      { type:'text', text:`Analyze this coffee bag. Extract: brand and product name (combine into one "name" field), roast level as one of: light, medium-light, medium, medium-dark, dark, origin country or region, and any visible EAN/UPC barcode number. Return ONLY valid JSON: {"name":"...","roast":"medium","origin":"...","barcode":"..."}` }
+    ];
+    const res = pjson(await claude([{ role:'user', content }]));
+    document.getElementById('bean-name').value = res.name || '';
+    const roastSel = document.getElementById('bean-roast');
+    const rv = (res.roast||'').toLowerCase().replace(' ','-');
+    [...roastSel.options].forEach(o => { if (o.value===rv) roastSel.value=rv; });
+    document.getElementById('bean-origin').value = res.origin || '';
+    document.getElementById('bean-barcode').value = nativeBarcode || res.barcode || '';
+    document.getElementById('bean-form').style.display = 'block';
+    out.innerHTML = '<span style="color:#50C870">Identified! Edit if needed, then save.</span>';
+    out.classList.add('on');
+  } catch(e) {
+    out.innerHTML = `<span class="er">Error: ${e.message}</span>`;
+    out.classList.add('on');
+  } finally { btn.disabled=false; btn.innerHTML='Identify Bean'; }
+}
+
+function saveBean() {
+  const name = document.getElementById('bean-name').value.trim();
+  if (!name) { document.getElementById('bean-name').focus(); return; }
+  const bean = {
+    id: Date.now().toString(),
+    name,
+    roast: document.getElementById('bean-roast').value,
+    origin: document.getElementById('bean-origin').value.trim(),
+    barcode: document.getElementById('bean-barcode').value.trim(),
+    settings: { grind: S.gc, dose: S.dose, temp: S.temp },
+    addedAt: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'})
+  };
+  beans.unshift(bean);
+  if (beans.length > 40) beans = beans.slice(0, 40);
+  saveBeans();
+  S.beanId = bean.id;
+  const msg = document.getElementById('bean-saved-msg');
+  msg.style.display = 'block';
+  setTimeout(() => { msg.style.display = ''; }, 2000);
+}
+
+function loadBeanSettings(id) {
+  const bean = beans.find(b => b.id === id);
+  if (!bean) return;
+  S.beanId = id;
+  if (bean.settings.grind != null) { S.gc = bean.settings.grind; document.getElementById('gcd').textContent = S.gc; }
+  if (bean.settings.dose != null) { S.dose = bean.settings.dose; document.getElementById('dosed').textContent = S.dose; }
+  if (bean.settings.temp != null) { S.temp = bean.settings.temp; document.getElementById('tempd').textContent = S.temp; }
+  renderBeans();
+  const mpb = document.getElementById('mp-b');
+  if (!mpb.classList.contains('open')) tog('mp');
+}
+
+function deleteBean(id) {
+  if (!confirm('Delete this bean and its shot history?')) return;
+  beans = beans.filter(b => b.id !== id);
+  shots = shots.filter(s => s.beanId !== id);
+  saveBeans(); saveShots();
+  if (S.beanId === id) S.beanId = null;
+}
+
+function renderBeans() {
+  const list  = document.getElementById('bean-list');
+  const empty = document.getElementById('bean-empty');
+  const cnt   = beans.length;
+  document.getElementById('bean-cnt').textContent  = cnt;
+  document.getElementById('bean-cnt2').textContent = cnt;
+  if (!cnt) { list.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  const tagLabel = { perfect:'Perfect', under:'Under', over:'Over', slight:'Minor', mix:'Mixed', stale:'Bean issue' };
+  list.innerHTML = beans.map(b => {
+    const bShots = shots.filter(s => s.beanId === b.id);
+    const lastTag = bShots[0] ? (tagLabel[bShots[0].tag] || bShots[0].tag) : '';
+    const active  = S.beanId === b.id;
+    const meta = [b.roast, b.origin, b.addedAt, bShots.length ? `${bShots.length} shot${bShots.length>1?'s':''}${lastTag?' · last: '+lastTag:''}` : ''].filter(Boolean).join(' · ');
+    return `<div class="bean-item${active?' bean-active':''}">
+      <div class="bean-nm">${b.name}</div>
+      <div class="bean-mt">${meta}</div>
+      <div class="bean-acts">
+        <button class="bload${active?' active':''}" onclick="loadBeanSettings('${b.id}')">${active?'✓ Active':'Load settings'}</button>
+        <button class="bdel" onclick="deleteBean('${b.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function logShot(resultTag) {
+  const shot = {
+    id: Date.now().toString(),
+    beanId: S.beanId || null,
+    date: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short'}),
+    settings: { grind:S.gc, dose:S.dose, temp:S.temp, time:S.time, ph:S.ph, crema:S.crema },
+    tag: resultTag
+  };
+  shots.unshift(shot);
+  if (shots.length > 300) shots = shots.slice(0, 300);
+  saveShots();
+  renderBeans();
+  const btn = document.getElementById('log-btn');
+  if (btn) { btn.textContent = '✓ Shot logged'; btn.classList.add('done'); btn.onclick = null; }
+  // Refresh trend box inline
+  const tbox = document.getElementById('trend-box');
+  if (tbox && S.beanId) tbox.outerHTML = buildTrend(S.beanId);
+}
+
+function buildTrend(beanId) {
+  if (!beanId) return '';
+  const bShots = shots.filter(s => s.beanId === beanId).slice(0, 10);
+  if (bShots.length < 2) return '';
+  const bean = beans.find(b => b.id === beanId);
+  const tagLabel = { perfect:'Perfect ✓', under:'Under-ext', over:'Over-ext', slight:'Minor adj', mix:'Mixed', stale:'Bean issue' };
+  const rows = bShots.slice(0,5).map(s => {
+    const g = s.settings.grind != null ? 'G'+s.settings.grind : '—';
+    const d = s.settings.dose  != null ? s.settings.dose+'g'  : '';
+    return `<div class="trend-row"><span>${s.date}</span><span>${[g,d].filter(Boolean).join(' · ')} · pH${s.settings.ph}</span><span>${tagLabel[s.tag]||s.tag}</span></div>`;
+  }).join('');
+  const last3 = bShots.slice(0,3).map(s=>s.tag);
+  const underN = last3.filter(t=>t==='under').length;
+  const overN  = last3.filter(t=>t==='over').length;
+  const perfectN = last3.filter(t=>t==='perfect').length;
+  const lg = bShots[0]?.settings?.grind;
+  let tip;
+  if (underN >= 2)    tip = `<strong>Trend: under-extraction.</strong> Try grind ${lg!=null?`<strong>${lg} → ${lg-1}</strong>`:'1 step'} finer next shot.`;
+  else if (overN >= 2) tip = `<strong>Trend: over-extraction.</strong> Try grind ${lg!=null?`<strong>${lg} → ${lg+1}</strong>`:'1 step'} coarser next shot.`;
+  else if (perfectN >= 2) tip = `<strong>Dialled in!</strong> These settings are consistently working for this bean.`;
+  else tip = `<strong>Mixed results.</strong> Log a few more shots to see a clear pattern.`;
+  return `<div class="trend-box" id="trend-box">
+    <div class="trend-hd">📈 Shot history${bean?' — '+bean.name:''}</div>
+    ${rows}
+    <div class="trend-tip">${tip}</div>
+  </div>`;
+}
+
 // ── INIT ───────────────────────────────────────────────
 loadPro();
 loadKey();
+renderBeans();
 if (!db.g('pro'))    tog('mp');
 if (!db.g('apiKey')) tog('api');
 
