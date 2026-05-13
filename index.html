@@ -122,13 +122,30 @@ select{width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px
 .dck{background:#2A2000;color:#D0A020}
 .pfx{text-align:center;padding:16px 0}
 .pfxi{font-size:3rem;margin-bottom:8px}
-/* api settings */
-.api-row{display:flex;gap:8px;margin-bottom:4px}
-.api-in{flex:1;padding:8px 10px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:.8rem;font-family:monospace}
-.astat{font-size:.72rem;margin-top:4px}
+/* api key modal */
+.key-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.key-box{background:var(--card);border-radius:18px;padding:26px 22px;max-width:360px;width:100%;border:1px solid var(--border)}
+.key-logo-wrap{display:flex;justify-content:center;margin-bottom:16px}
+.key-title{font-size:1.05rem;font-weight:700;color:var(--crema);margin-bottom:8px;text-align:center}
+.key-desc{font-size:.76rem;color:var(--muted);line-height:1.5;margin-bottom:16px;text-align:center}
+.key-link{display:block;text-align:center;padding:11px;background:#2A1A08;border:1px solid #5A3010;border-radius:9px;color:var(--crema);text-decoration:none;font-size:.85rem;font-weight:600;margin-bottom:14px;transition:background .15s}
+.key-link:hover{background:#3A2010}
+.key-hint{font-size:.68rem;color:var(--muted);margin-bottom:6px}
+.key-in{width:100%;padding:10px 12px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:.8rem;font-family:monospace;box-sizing:border-box;transition:border-color .2s,box-shadow .2s}
+.key-in:focus{outline:none;border-color:var(--crema)}
+.key-in.key-ok{border-color:#50C870;box-shadow:0 0 0 2px rgba(80,200,112,.2)}
+.key-stat{font-size:.72rem;min-height:1.1em;margin:5px 0 10px}
+.key-skip{width:100%;padding:9px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:.75rem;cursor:pointer;transition:color .15s}
+.key-skip:hover{color:var(--text)}
+.key-note{font-size:.6rem;color:#5A3818;line-height:1.4;margin-top:10px;text-align:center}
+/* key chip in header */
+.key-chip{display:flex;align-items:center;gap:5px;padding:4px 11px;background:var(--card);border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:.7rem;color:var(--muted);width:fit-content;margin:5px auto 0;transition:border-color .15s}
+.key-chip:hover{border-color:var(--crema)}
+.kd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.kd-on{background:#50C870;box-shadow:0 0 5px rgba(80,200,112,.5)}
+.kd-off{background:#6A4828}
 .ok{color:#50C870}
 .er{color:#E07060}
-.anote{font-size:.65rem;color:#6A4828;line-height:1.4;margin-top:8px}
 .pmsg{font-size:.7rem;color:#50C870;margin-top:6px;display:none}
 /* bean library */
 .bean-item{background:#1C0D00;border-radius:10px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--border)}
@@ -156,6 +173,29 @@ select{width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px
 </head>
 <body>
 
+<!-- API KEY MODAL -->
+<div id="key-modal" class="key-overlay" style="display:none">
+  <div class="key-box">
+    <div class="key-logo-wrap">
+      <svg viewBox="0 0 100 100" width="48" height="48" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50,2 A38,48 0 0,1 50,98 A19,24 0 0,1 50,50 A19,24 0 0,0 50,2 Z" fill="#C4843A"/>
+        <path d="M50,2 A38,48 0 0,0 50,98 A19,24 0 0,0 50,50 A19,24 0 0,1 50,2 Z" fill="#3B1F0A"/>
+        <circle cx="50" cy="26" r="6.5" fill="#C4843A"/>
+        <circle cx="50" cy="74" r="6.5" fill="#3B1F0A"/>
+        <ellipse cx="50" cy="50" rx="38" ry="48" fill="none" stroke="#0D0500" stroke-width="2.5"/>
+      </svg>
+    </div>
+    <div class="key-title">Connect Claude AI</div>
+    <div class="key-desc">Crema analysis, bean identification, and machine settings reading all use Claude AI vision. You need a free Anthropic API key to enable these.</div>
+    <a class="key-link" href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Get your free API key ↗</a>
+    <div class="key-hint">Paste your key here — it saves automatically</div>
+    <input type="password" id="key-in" class="key-in" placeholder="sk-ant-api03-…" autocomplete="off">
+    <div id="key-stat" class="key-stat"></div>
+    <button class="key-skip" onclick="closeKeyModal()">Skip — use without AI features</button>
+    <p class="key-note">Stored only in this browser · Sent only to api.anthropic.com</p>
+  </div>
+</div>
+
 <div class="logo-wrap">
   <svg viewBox="0 0 100 100" width="56" height="56" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <!-- Crema (light) half -->
@@ -173,7 +213,11 @@ select{width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px
   </svg>
 </div>
 <h1>Sage Coffee Calibrator</h1>
-<p class="sub">Measure &rarr; diagnose &rarr; dial in</p>
+<div class="key-chip" id="key-chip" onclick="openKeyModal()">
+  <span class="kd kd-off" id="key-dot"></span>
+  <span id="key-chip-txt">Connect AI</span>
+</div>
+<p class="sub" style="margin-top:8px">Measure &rarr; diagnose &rarr; dial in</p>
 
 <!-- MACHINE PROFILE -->
 <div class="card">
@@ -385,23 +429,6 @@ select{width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px
 </div>
 <div id="result"></div>
 
-<!-- API SETTINGS -->
-<div class="card" style="margin-top:24px;opacity:.85">
-  <div class="card-hdr" onclick="tog('api')">
-    <div class="lbl" style="margin:0">API settings (image analysis)</div>
-    <span class="chevron" id="api-ch">&#8964;</span>
-  </div>
-  <div class="card-body" id="api-b">
-    <p style="font-size:.72rem;color:var(--muted);margin-bottom:10px">Photo analysis uses the Claude AI vision API. Enter your Anthropic API key to enable it.</p>
-    <div class="api-row">
-      <input type="password" class="api-in" id="akin" placeholder="sk-ant-api03-...">
-      <button class="sec" onclick="saveKey()">Save</button>
-    </div>
-    <div id="akstat" class="astat"></div>
-    <p class="anote">Stored only in this browser (localStorage). Sent only to api.anthropic.com — never to any other server. Get a key at console.anthropic.com.</p>
-  </div>
-</div>
-
 <!-- File inputs live here — outside all display:none sections so .click() always works -->
 <input class="finput" type="file" id="msi"   accept="image/*" onchange="onFile('ms',this)">
 <input class="finput" type="file" id="crsi"  accept="image/*" onchange="onFile('crs',this)">
@@ -611,11 +638,7 @@ function pjson(text) {
 
 function needsKey(out) {
   if (db.g('apiKey')) return false;
-  out.innerHTML = '<strong style="color:#E07060">API key required</strong><br>Add your Anthropic key in the Settings section — scroll down and open "API settings".';
-  out.classList.add('on');
-  const ab = document.getElementById('api-b');
-  if (!ab.classList.contains('open')) tog('api');
-  setTimeout(() => ab.scrollIntoView({behavior:'smooth',block:'start'}), 100);
+  openKeyModal();
   return true;
 }
 
@@ -711,18 +734,39 @@ async function analyzeCrma() {
   } finally { btn.disabled=false; btn.innerHTML='Analyze Crema'; }
 }
 
-// ── API KEY ────────────────────────────────────────────
-function saveKey() {
-  const k = document.getElementById('akin').value.trim(); if(!k) return;
-  db.s('apiKey', k);
-  document.getElementById('akin').value='';
-  document.getElementById('akstat').innerHTML='<span class="ok">Key saved</span>';
-  setTimeout(()=>document.getElementById('akstat').innerHTML='',3000);
+// ── API KEY MODAL ──────────────────────────────────────
+function openKeyModal() {
+  document.getElementById('key-modal').style.display = 'flex';
+  setTimeout(() => document.getElementById('key-in').focus(), 50);
+}
+function closeKeyModal() {
+  document.getElementById('key-modal').style.display = 'none';
+}
+function updateKeyChip() {
+  const k = db.g('apiKey');
+  document.getElementById('key-dot').className = 'kd ' + (k ? 'kd-on' : 'kd-off');
+  document.getElementById('key-chip-txt').textContent = k ? 'AI connected' : 'Connect AI';
 }
 function loadKey() {
-  const k = db.g('apiKey');
-  if (k) document.getElementById('akstat').innerHTML=`<span class="ok">Key loaded (${k.slice(0,14)}…)</span>`;
+  updateKeyChip();
+  if (!db.g('apiKey')) setTimeout(openKeyModal, 400);
 }
+document.addEventListener('DOMContentLoaded', () => {
+  loadKey();
+  document.getElementById('key-in').addEventListener('input', function() {
+    const v = this.value.trim();
+    if (v.startsWith('sk-ant-') && v.length > 30) {
+      db.s('apiKey', v);
+      this.classList.add('key-ok');
+      document.getElementById('key-stat').innerHTML = '<span class="ok">✓ Key saved — AI features enabled</span>';
+      updateKeyChip();
+      setTimeout(() => { closeKeyModal(); this.value=''; this.classList.remove('key-ok'); document.getElementById('key-stat').innerHTML=''; }, 1400);
+    }
+  });
+  document.getElementById('key-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('key-modal')) closeKeyModal();
+  });
+});
 
 // ── EVALUATE ───────────────────────────────────────────
 function runEval() {
@@ -1011,10 +1055,8 @@ function buildTrend(beanId) {
 
 // ── INIT ───────────────────────────────────────────────
 loadPro();
-loadKey();
 renderBeans();
-if (!db.g('pro'))    tog('mp');
-if (!db.g('apiKey')) tog('api');
+if (!db.g('pro')) tog('mp');
 
 // ── SERVICE WORKER (offline / PWA) ────────────────────
 if ('serviceWorker' in navigator) {
