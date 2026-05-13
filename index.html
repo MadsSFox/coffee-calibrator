@@ -392,28 +392,86 @@ body.no-key .ai-tip{display:block}
   </div>
   <div class="pane on" id="cr-man">
     <div class="sg">
+      <!-- No crema: dark espresso surface, oily sheen -->
       <div class="si" data-cv="none" onclick="pickC(this)">
-        <div class="sw" style="background:#1C0D00;border:2px dashed #6A4828"></div>
+        <svg class="sw" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="border:2px dashed #6A4828">
+          <defs><radialGradient id="cg0" cx="42%" cy="38%"><stop offset="0%" stop-color="#3C1A08"/><stop offset="70%" stop-color="#180800"/><stop offset="100%" stop-color="#0A0300"/></radialGradient></defs>
+          <circle cx="50" cy="50" r="50" fill="url(#cg0)"/>
+          <ellipse cx="37" cy="31" rx="15" ry="7" fill="white" opacity="0.07" transform="rotate(-22 37 31)"/>
+          <ellipse cx="62" cy="68" rx="8" ry="4" fill="#3A1006" opacity="0.5"/>
+        </svg>
         <div class="sn">No<br>crema</div>
       </div>
+      <!-- White/Pale: thin bubbly over-extracted layer -->
       <div class="si" data-cv="white" onclick="pickC(this)">
-        <div class="sw" style="background:#F0E8D0"></div>
+        <svg class="sw" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs><radialGradient id="cg1" cx="44%" cy="40%"><stop offset="0%" stop-color="#F5EDD6"/><stop offset="55%" stop-color="#E0D0A8"/><stop offset="100%" stop-color="#BCA878"/></radialGradient></defs>
+          <circle cx="50" cy="50" r="50" fill="url(#cg1)"/>
+          <circle cx="27" cy="37" r="6.5" fill="none" stroke="#C8BC8A" stroke-width="1.5" opacity="0.7"/>
+          <circle cx="57" cy="27" r="4.5" fill="none" stroke="#C8BC8A" stroke-width="1" opacity="0.6"/>
+          <circle cx="69" cy="53" r="8" fill="none" stroke="#C0B480" stroke-width="1.5" opacity="0.5"/>
+          <circle cx="37" cy="67" r="5" fill="none" stroke="#C8BC8A" stroke-width="1" opacity="0.55"/>
+          <circle cx="75" cy="36" r="3.5" fill="none" stroke="#C8BC8A" stroke-width="1" opacity="0.45"/>
+          <circle cx="47" cy="74" r="5.5" fill="none" stroke="#C0B480" stroke-width="1" opacity="0.45"/>
+          <circle cx="20" cy="58" r="4" fill="none" stroke="#C8BC8A" stroke-width="1" opacity="0.4"/>
+          <ellipse cx="40" cy="32" rx="11" ry="5" fill="white" opacity="0.18" transform="rotate(-20 40 32)"/>
+        </svg>
         <div class="sn">White/<br>Pale</div>
       </div>
+      <!-- Light Golden: thin even layer, under-extracted -->
       <div class="si" data-cv="light" onclick="pickC(this)">
-        <div class="sw" style="background:#D4A84B"></div>
+        <svg class="sw" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs><radialGradient id="cg2" cx="42%" cy="40%"><stop offset="0%" stop-color="#EAC85E"/><stop offset="50%" stop-color="#C09830"/><stop offset="100%" stop-color="#8A6810"/></radialGradient></defs>
+          <circle cx="50" cy="50" r="50" fill="url(#cg2)"/>
+          <ellipse cx="38" cy="33" rx="14" ry="6" fill="white" opacity="0.16" transform="rotate(-18 38 33)"/>
+          <circle cx="50" cy="50" r="41" fill="none" stroke="#987018" stroke-width="2.5" opacity="0.22"/>
+          <circle cx="50" cy="50" r="28" fill="none" stroke="#987018" stroke-width="1.5" opacity="0.14"/>
+          <path d="M20,62 Q42,52 68,58 Q82,62 90,72" fill="none" stroke="#B08820" stroke-width="1.5" opacity="0.2"/>
+        </svg>
         <div class="sn">Light<br>Golden</div>
       </div>
+      <!-- Hazelnut: ideal dense crema, warm brown -->
       <div class="si" data-cv="hazel" onclick="pickC(this)">
-        <div class="sw" style="background:#B47228;border:3px solid #60D080"></div>
+        <svg class="sw" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="border:3px solid #60D080">
+          <defs><radialGradient id="cg3" cx="40%" cy="38%"><stop offset="0%" stop-color="#DC9432"/><stop offset="45%" stop-color="#AA6418"/><stop offset="100%" stop-color="#683808"/></radialGradient></defs>
+          <circle cx="50" cy="50" r="50" fill="url(#cg3)"/>
+          <ellipse cx="37" cy="32" rx="16" ry="7" fill="white" opacity="0.13" transform="rotate(-18 37 32)"/>
+          <path d="M12,58 Q32,38 60,33 Q78,30 88,42" fill="none" stroke="#C07820" stroke-width="2.5" opacity="0.28"/>
+          <path d="M8,72 Q30,52 62,47 Q82,44 92,58" fill="none" stroke="#B87020" stroke-width="2" opacity="0.22"/>
+          <path d="M18,45 Q40,32 65,30" fill="none" stroke="#C88030" stroke-width="1.5" opacity="0.18"/>
+          <circle cx="60" cy="62" r="8" fill="#7A4010" opacity="0.2"/>
+          <circle cx="30" cy="60" r="6" fill="#7A4010" opacity="0.15"/>
+        </svg>
         <div class="sn">Hazel-<br>nut ✓</div>
       </div>
+      <!-- Tiger stripe: ideal, characteristic swirl pattern -->
       <div class="si" data-cv="tiger" onclick="pickC(this)">
-        <div class="sw" style="background:radial-gradient(circle,#C8823A 30%,#6A3A10 70%);border:3px solid #60D080"></div>
+        <svg class="sw" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="border:3px solid #60D080">
+          <defs>
+            <radialGradient id="cg4" cx="48%" cy="44%"><stop offset="0%" stop-color="#CC8030"/><stop offset="100%" stop-color="#7A4010"/></radialGradient>
+            <clipPath id="cc4"><circle cx="50" cy="50" r="50"/></clipPath>
+          </defs>
+          <circle cx="50" cy="50" r="50" fill="url(#cg4)"/>
+          <g clip-path="url(#cc4)">
+            <path d="M2,18 Q32,42 18,68 Q8,84 22,102" fill="none" stroke="#3A1806" stroke-width="10" opacity="0.62"/>
+            <path d="M36,-2 Q64,22 48,54 Q36,78 52,102" fill="none" stroke="#2E1204" stroke-width="9" opacity="0.58"/>
+            <path d="M70,2 Q92,28 80,56 Q70,78 86,102" fill="none" stroke="#3A1806" stroke-width="8" opacity="0.52"/>
+            <path d="M-4,50 Q16,62 8,82" fill="none" stroke="#4A2008" stroke-width="7" opacity="0.42"/>
+          </g>
+          <ellipse cx="37" cy="33" rx="13" ry="6" fill="white" opacity="0.11" transform="rotate(-15 37 33)"/>
+        </svg>
         <div class="sn">Tiger<br>stripe ✓</div>
       </div>
+      <!-- Dark/Black: over-extracted, very dark -->
       <div class="si" data-cv="dark" onclick="pickC(this)">
-        <div class="sw" style="background:#2E1008"></div>
+        <svg class="sw" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs><radialGradient id="cg5" cx="42%" cy="38%"><stop offset="0%" stop-color="#2E1208"/><stop offset="60%" stop-color="#120600"/><stop offset="100%" stop-color="#060201"/></radialGradient></defs>
+          <circle cx="50" cy="50" r="50" fill="url(#cg5)"/>
+          <circle cx="36" cy="46" r="15" fill="#040100" opacity="0.55"/>
+          <circle cx="63" cy="62" r="12" fill="#040100" opacity="0.45"/>
+          <circle cx="55" cy="35" r="8" fill="#040100" opacity="0.35"/>
+          <ellipse cx="37" cy="31" rx="10" ry="5" fill="white" opacity="0.04" transform="rotate(-15 37 31)"/>
+        </svg>
         <div class="sn">Dark/<br>Black</div>
       </div>
     </div>
