@@ -138,6 +138,14 @@ select{width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px
 .key-skip{width:100%;padding:9px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:.75rem;cursor:pointer;transition:color .15s}
 .key-skip:hover{color:var(--text)}
 .key-note{font-size:.6rem;color:#5A3818;line-height:1.4;margin-top:10px;text-align:center}
+.key-remove{width:100%;padding:9px;background:transparent;color:#E07060;border:1px solid #5A2020;border-radius:8px;font-size:.78rem;cursor:pointer;margin-bottom:6px;transition:background .15s;display:none}
+.key-remove:hover{background:#2A1010}
+.key-current{font-size:.72rem;color:var(--muted);text-align:center;margin-bottom:14px;font-family:monospace}
+/* ai gate — grayed out when no key */
+.ai-gate{transition:opacity .2s,filter .2s}
+body.no-key .ai-gate{opacity:.32;filter:grayscale(.8);pointer-events:none}
+.ai-tip{display:none;font-size:.65rem;color:#7A5030;text-align:center;margin-top:5px;cursor:pointer;text-decoration:underline;text-underline-offset:2px;text-decoration-color:#5A3818}
+body.no-key .ai-tip{display:block}
 /* key chip in header */
 .key-chip{display:flex;align-items:center;gap:5px;padding:4px 11px;background:var(--card);border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:.7rem;color:var(--muted);width:fit-content;margin:5px auto 0;transition:border-color .15s}
 .key-chip:hover{border-color:var(--crema)}
@@ -185,13 +193,15 @@ select{width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px
         <ellipse cx="50" cy="50" rx="38" ry="48" fill="none" stroke="#0D0500" stroke-width="2.5"/>
       </svg>
     </div>
-    <div class="key-title">Connect Claude AI</div>
-    <div class="key-desc">Crema analysis, bean identification, and machine settings reading all use Claude AI vision. You need a free Anthropic API key to enable these.</div>
-    <a class="key-link" href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Get your free API key ↗</a>
-    <div class="key-hint">Paste your key here — it saves automatically</div>
+    <div class="key-title" id="key-title">Connect Claude AI</div>
+    <div class="key-desc" id="key-desc">Crema analysis, bean identification, and machine settings reading all use Claude AI vision. You need a free Anthropic API key to enable these.</div>
+    <div class="key-current" id="key-current" style="display:none"></div>
+    <a class="key-link" id="key-connect-link" href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Get your free API key ↗</a>
+    <div class="key-hint" id="key-hint">Paste your key here — it saves automatically</div>
     <input type="password" id="key-in" class="key-in" placeholder="sk-ant-api03-…" autocomplete="off">
     <div id="key-stat" class="key-stat"></div>
-    <button class="key-skip" onclick="closeKeyModal()">Skip — use without AI features</button>
+    <button class="key-remove" id="key-remove-btn" onclick="removeKey()">Remove key (disable AI features)</button>
+    <button class="key-skip" id="key-skip" onclick="closeKeyModal()">Skip — use without AI features</button>
     <p class="key-note">Stored only in this browser · Sent only to api.anthropic.com</p>
   </div>
 </div>
@@ -242,14 +252,17 @@ select{width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px
     </div>
     <div style="margin-bottom:12px">
       <div style="font-size:.65rem;color:#6A4828;margin-bottom:4px">Read settings from photo <span class="badge">AI</span></div>
-      <label for="msi" class="upzone" id="msz">
-        <div class="upicon">📸</div>
-        <div class="uptxt">Click to upload a photo</div>
-        <div class="upsub">Grinder dial, digital display, or control panel</div>
-      </label>
-      <img class="prev" id="msp">
-      <button class="abtn" id="msab" onclick="analyzeMachineSettings()">Read Settings</button>
-      <div class="ares" id="msar"></div>
+      <div class="ai-gate">
+        <label for="msi" class="upzone" id="msz">
+          <div class="upicon">📸</div>
+          <div class="uptxt">Click to upload a photo</div>
+          <div class="upsub">Grinder dial, digital display, or control panel</div>
+        </label>
+        <img class="prev" id="msp">
+        <button class="abtn" id="msab" onclick="analyzeMachineSettings()">Read Settings</button>
+        <div class="ares" id="msar"></div>
+      </div>
+      <div class="ai-tip" onclick="openKeyModal()">🔑 Connect AI to enable</div>
     </div>
     <div class="gg">
       <div class="gf" id="gcf">
@@ -303,14 +316,17 @@ select{width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px
     </div>
     <!-- Identify pane -->
     <div class="pane on" id="bl-id">
-      <label for="beani" class="upzone" id="beanz">
-        <div class="upicon">🛍️</div>
-        <div class="uptxt">Photo of the coffee bag</div>
-        <div class="upsub">AI reads brand, roast, origin &amp; barcode</div>
-      </label>
-      <img class="prev" id="beanp">
-      <button class="abtn" id="beanab" onclick="analyzeBag()">Identify Bean</button>
-      <div class="ares" id="beanar"></div>
+      <div class="ai-gate">
+        <label for="beani" class="upzone" id="beanz">
+          <div class="upicon">🛍️</div>
+          <div class="uptxt">Photo of the coffee bag</div>
+          <div class="upsub">AI reads brand, roast, origin &amp; barcode</div>
+        </label>
+        <img class="prev" id="beanp">
+        <button class="abtn" id="beanab" onclick="analyzeBag()">Identify Bean</button>
+        <div class="ares" id="beanar"></div>
+      </div>
+      <div class="ai-tip" onclick="openKeyModal()">🔑 Connect AI to enable</div>
       <div id="bean-form" style="display:none;margin-top:10px">
         <div class="lbl" style="margin-bottom:4px">Name / product</div>
         <input type="text" id="bean-name" class="tinput" placeholder="e.g. Blue Bottle Three Africas">
@@ -364,7 +380,7 @@ select{width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px
   <div class="lbl">Crema colour</div>
   <div class="tabs">
     <button class="tab on" onclick="stab('cr','man',this)">Manual</button>
-    <button class="tab" onclick="stab('cr','img',this)">Photo <span class="badge">AI</span></button>
+    <button class="tab" id="cr-img-tab" onclick="keyOrTab('cr','img',this)">Photo <span class="badge">AI</span></button>
   </div>
   <div class="pane on" id="cr-man">
     <div class="sg">
@@ -397,14 +413,17 @@ select{width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px
   </div>
   <div class="pane" id="cr-img">
     <p style="font-size:.72rem;color:var(--muted);margin-bottom:10px">Upload a top-down photo of the espresso shot immediately after pulling. The crema should be clearly visible.</p>
-    <label for="crsi" class="upzone" id="crsz">
-      <div class="upicon">☕</div>
-      <div class="uptxt">Click to upload a photo</div>
-      <div class="upsub">Top-down shot showing the crema</div>
-    </label>
-    <img class="prev" id="crsp">
-    <button class="abtn" id="crab" onclick="analyzeCrma()">Analyze Crema</button>
-    <div class="ares" id="crar"></div>
+    <div class="ai-gate">
+      <label for="crsi" class="upzone" id="crsz">
+        <div class="upicon">☕</div>
+        <div class="uptxt">Click to upload a photo</div>
+        <div class="upsub">Top-down shot showing the crema</div>
+      </label>
+      <img class="prev" id="crsp">
+      <button class="abtn" id="crab" onclick="analyzeCrma()">Analyze Crema</button>
+      <div class="ares" id="crar"></div>
+    </div>
+    <div class="ai-tip" onclick="openKeyModal()">🔑 Connect AI to enable</div>
   </div>
 </div>
 
@@ -736,19 +755,43 @@ async function analyzeCrma() {
 
 // ── API KEY MODAL ──────────────────────────────────────
 function openKeyModal() {
+  const k = db.g('apiKey');
+  document.getElementById('key-title').textContent = k ? 'AI key settings' : 'Connect Claude AI';
+  document.getElementById('key-desc').innerHTML = k
+    ? 'Paste a new key below to replace the current one.'
+    : 'Crema analysis, bean identification, and machine settings reading all use Claude AI vision. You need a free Anthropic API key to enable these.';
+  document.getElementById('key-current').style.display = k ? 'block' : 'none';
+  if (k) document.getElementById('key-current').textContent = k.slice(0, 20) + '…';
+  document.getElementById('key-connect-link').style.display = k ? 'none' : 'block';
+  document.getElementById('key-hint').textContent = k ? 'Paste a new key to replace it — saves automatically' : 'Paste your key here — it saves automatically';
+  document.getElementById('key-remove-btn').style.display = k ? 'block' : 'none';
+  document.getElementById('key-skip').textContent = k ? 'Cancel' : 'Skip — use without AI features';
+  document.getElementById('key-stat').innerHTML = '';
+  document.getElementById('key-in').value = '';
+  document.getElementById('key-in').classList.remove('key-ok');
   document.getElementById('key-modal').style.display = 'flex';
   setTimeout(() => document.getElementById('key-in').focus(), 50);
 }
 function closeKeyModal() {
   document.getElementById('key-modal').style.display = 'none';
 }
-function updateKeyChip() {
+function removeKey() {
+  db.s('apiKey', '');
+  applyKeyState();
+  closeKeyModal();
+}
+function applyKeyState() {
   const k = db.g('apiKey');
+  document.body.classList.toggle('no-key', !k);
   document.getElementById('key-dot').className = 'kd ' + (k ? 'kd-on' : 'kd-off');
   document.getElementById('key-chip-txt').textContent = k ? 'AI connected' : 'Connect AI';
 }
+function keyOrTab(group, pane, el) {
+  if (!db.g('apiKey')) { openKeyModal(); return; }
+  stab(group, pane, el);
+}
 function loadKey() {
-  updateKeyChip();
+  applyKeyState();
   if (!db.g('apiKey')) setTimeout(openKeyModal, 400);
 }
 document.addEventListener('DOMContentLoaded', () => {
@@ -759,7 +802,7 @@ document.addEventListener('DOMContentLoaded', () => {
       db.s('apiKey', v);
       this.classList.add('key-ok');
       document.getElementById('key-stat').innerHTML = '<span class="ok">✓ Key saved — AI features enabled</span>';
-      updateKeyChip();
+      applyKeyState();
       setTimeout(() => { closeKeyModal(); this.value=''; this.classList.remove('key-ok'); document.getElementById('key-stat').innerHTML=''; }, 1400);
     }
   });
