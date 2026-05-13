@@ -138,6 +138,9 @@ select{width:100%;padding:10px;background:var(--bg);color:var(--text);border:1px
 .key-skip{width:100%;padding:9px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:.75rem;cursor:pointer;transition:color .15s}
 .key-skip:hover{color:var(--text)}
 .key-note{font-size:.6rem;color:#5A3818;line-height:1.4;margin-top:10px;text-align:center}
+.key-steps{margin:12px 0 14px;display:flex;flex-direction:column;gap:8px}
+.key-step{display:flex;align-items:flex-start;gap:9px;font-size:.75rem;color:var(--muted);line-height:1.4}
+.key-step-n{flex-shrink:0;width:18px;height:18px;border-radius:50%;background:#3A1A08;border:1px solid #5A3010;color:var(--crema);font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
 .key-remove{width:100%;padding:9px;background:transparent;color:#E07060;border:1px solid #5A2020;border-radius:8px;font-size:.78rem;cursor:pointer;margin-bottom:6px;transition:background .15s;display:none}
 .key-remove:hover{background:#2A1010}
 .key-current{font-size:.72rem;color:var(--muted);text-align:center;margin-bottom:14px;font-family:monospace}
@@ -194,9 +197,14 @@ body.no-key .ai-tip{display:block}
       </svg>
     </div>
     <div class="key-title" id="key-title">Connect Claude AI</div>
-    <div class="key-desc" id="key-desc">Crema analysis, bean identification, and machine settings reading all use Claude AI vision. You need a free Anthropic API key to enable these.</div>
+    <div class="key-desc" id="key-desc">AI photo features need an Anthropic API key. Takes about 2 minutes to set up — free account, no card required.</div>
+    <div class="key-steps" id="key-steps">
+      <div class="key-step"><span class="key-step-n">1</span>Create a free account at console.anthropic.com</div>
+      <div class="key-step"><span class="key-step-n">2</span>Go to <strong>Settings → API Keys</strong> and create a new key</div>
+      <div class="key-step"><span class="key-step-n">3</span>Paste it below — saves automatically</div>
+    </div>
     <div class="key-current" id="key-current" style="display:none"></div>
-    <a class="key-link" id="key-connect-link" href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Get your free API key ↗</a>
+    <a class="key-link" id="key-connect-link" href="https://console.anthropic.com" target="_blank" rel="noopener">Open Anthropic Console ↗</a>
     <div class="key-hint" id="key-hint">Paste your key here — it saves automatically</div>
     <input type="password" id="key-in" class="key-in" placeholder="sk-ant-api03-…" autocomplete="off">
     <div id="key-stat" class="key-stat"></div>
@@ -759,7 +767,8 @@ function openKeyModal() {
   document.getElementById('key-title').textContent = k ? 'AI key settings' : 'Connect Claude AI';
   document.getElementById('key-desc').innerHTML = k
     ? 'Paste a new key below to replace the current one.'
-    : 'Crema analysis, bean identification, and machine settings reading all use Claude AI vision. You need a free Anthropic API key to enable these.';
+    : 'AI photo features need an Anthropic API key. Takes about 2 minutes to set up — free account, no card required.';
+  document.getElementById('key-steps').style.display = k ? 'none' : 'flex';
   document.getElementById('key-current').style.display = k ? 'block' : 'none';
   if (k) document.getElementById('key-current').textContent = k.slice(0, 20) + '…';
   document.getElementById('key-connect-link').style.display = k ? 'none' : 'block';
